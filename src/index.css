@@ -1,0 +1,182 @@
+@import "tailwindcss";
+
+/* ═══════════════════════════════════════════════════════════════════
+   DESIGN TOKENS (Tailwind v4)
+═══════════════════════════════════════════════════════════════════ */
+@theme {
+  --color-bg:    #D1D1D1;
+  --color-road:  #1E1E1E;
+  --color-green: #44DB79;
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   RESET
+═══════════════════════════════════════════════════════════════════ */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+/* FIX 2: hard stop at page end — no bounce, no extra scroll space */
+html, body {
+  overscroll-behavior: none;
+  overflow-x: hidden;
+  /* No bottom margin/padding — prevents extra scroll past pin end */
+  margin: 0;
+  padding: 0;
+}
+
+html, body, #root {
+  background: #D1D1D1;
+  width: 100%;
+}
+
+body {
+  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   HERO (FIX 1 + FIX 2)
+   Exactly 100svh. Hero is the ONLY content on the page.
+   Pinning via ScrollTrigger adds a spacer; overflow:hidden is on
+   the hero itself, not on html/body, so pinning works correctly.
+═══════════════════════════════════════════════════════════════════ */
+.hero {
+  position: relative;
+  width: 100%;
+  height: 100svh;
+  overflow: hidden;
+  background: #D1D1D1;
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   ROAD STRIP
+   Measured from reference: height 27.8vh, top 36.1vh.
+   At 900px: height≈250px, top≈325px → centered vertically.
+═══════════════════════════════════════════════════════════════════ */
+.road-strip {
+  position: absolute;
+  top: 36.1vh;
+  left: 0;
+  width: 100%;
+  height: 27.8vh;
+  background: #1E1E1E;
+  overflow: visible;   /* car overhangs top/bottom slightly */
+  z-index: 1;
+}
+
+/* ─── Green paint layer ──────────────────────────────────────────── */
+.green-strip {
+  position: absolute;
+  inset: 0;
+  background: #44DB79;
+  transform: scaleX(0);
+  transform-origin: left center;
+  will-change: transform;
+  z-index: 2;
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   HEADLINE WRAPPER
+   clip-path inset right shrinks as car advances → reveals letters.
+═══════════════════════════════════════════════════════════════════ */
+.headline-wrap {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  padding-left: 5vw;
+  clip-path: inset(0 100% 0 0);
+  will-change: clip-path;
+  z-index: 3;
+  pointer-events: none;
+}
+
+.headline {
+  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  font-size: 9vw;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: #000;
+  text-transform: uppercase;
+  white-space: nowrap;
+  line-height: 1;
+  user-select: none;
+}
+
+.headline .letter {
+  display: inline-block;
+  will-change: transform, opacity;
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   CAR CONTAINER
+   top: vertically centres the car (25vh) inside the strip (27.8vh).
+   top = stripTop + (stripHeight − carHeight) / 2
+       = 36.1vh + (27.8vh − 25vh) / 2 = 36.1vh + 1.4vh = 37.5vh
+   GSAP writes translateX only — no translateY in JS.
+═══════════════════════════════════════════════════════════════════ */
+.car-container {
+  position: absolute;
+  top: 37.5vh;
+  left: 0;                /* GSAP adds translateX */
+  z-index: 10;
+  will-change: transform;
+  line-height: 0;         /* prevent inline-block gap under img */
+}
+
+/* FIX 1: exact size per reference measurements
+   height: 25vh (≈225px @900px)  width: auto → aspect ≈2.3:1 → ≈27.5vw @1886px */
+.car-svg {
+  height: 25vh;
+  width: auto;
+  display: block;
+  /* NO box-shadow, NO filter, NO glow */
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   STAT CARDS
+═══════════════════════════════════════════════════════════════════ */
+.stat-card {
+  position: absolute;
+  width: 20vw;
+  height: 21vh;
+  border-radius: 8px;
+  padding: 2vw;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  z-index: 20;
+  will-change: transform, opacity;
+  opacity: 0;   /* GSAP reveals during intro */
+}
+
+.stat-value {
+  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  font-size: 4.5vw;
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: -0.02em;
+  display: block;
+}
+
+.stat-label {
+  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  font-size: 1vw;
+  font-weight: 400;
+  white-space: nowrap;
+  display: block;
+  margin-top: 0.8vh;
+  line-height: 1.3;
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   MOBILE (≤ 640px)
+═══════════════════════════════════════════════════════════════════ */
+@media (max-width: 640px) {
+  .road-strip  { height: 22vh; top: 39vh; }
+  .car-container { top: 39vh; }
+  .car-svg     { height: 20vh; }
+  .stat-card   { width: 42vw; height: 16vh; padding: 3vw; }
+  .stat-value  { font-size: 8vw; }
+  .stat-label  { font-size: 2.5vw; }
+  .headline    { font-size: 8vw; }
+}
