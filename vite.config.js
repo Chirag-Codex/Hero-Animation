@@ -5,7 +5,7 @@ import tailwindcss from '@tailwindcss/vite'
 // Set base to repo name for GitHub Pages deployment
 // Change 'car-scroll-animation' to your actual repo name if different
 export default defineConfig({
-  base: '/car-scroll-animation/',
+  base: '/',
   plugins: [
     react(),
     tailwindcss(),
